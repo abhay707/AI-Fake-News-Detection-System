@@ -1,0 +1,43 @@
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch, os
+from config import settings
+from datetime import datetime, timezone
+
+_tokenizers = {}
+_models     = {}
+
+MODEL_MAP = {
+    'roberta-base':    'roberta-base-fake-news',
+    'bert-base':       'bert-base-fake-news',
+    'distilbert-base': 'distilbert-base-fake-news',
+}
+
+def _load(model_id: str):
+    if model_id not in _models:
+        path = os.path.join(settings.model_path, MODEL_MAP[model_id])
+        _tokenizers[model_id] = AutoTokenizer.from_pretrained(path)
+        _models[model_id]     = AutoModelForSequenceClassification.from_pretrained(path)
+        _models[model_id].eval()
+
+def predict(text: str, model_id: str = 'roberta-base') -> dict:
+    if settings.environment == 'development':
+        import random
+        return {
+            'prediction': 'FAKE' if random.random() > 0.5 else 'REAL',
+            'confidence': round(random.uniform(0.7, 0.99), 4),
+            'model_used': f'{model_id}-mock',
+            'analysed_at': datetime.now(timezone.utc)
+        }
+    _load(model_id)
+    tok  = _tokenizers[model_id]
+    mdl  = _models[model_id]
+    inputs = tok(text, return_tensors='pt',
+                 truncation=True, max_length=512, padding=True)
+    with torch.no_grad():
+        logits = mdl(**inputs).logits
+    probs  = torch.softmax(logits, dim=1)[0]
+    label  = 'FAKE' if probs[1] > probs[0] else 'REAL'
+    conf   = float(probs[1] if label == 'FAKE' else probs[0])
+    return { 'prediction': label, 'confidence': round(conf,4),
+             'model_used': model_id,
+             'analysed_at': datetime.now(timezone.utc) }
