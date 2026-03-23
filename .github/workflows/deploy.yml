@@ -14,6 +14,10 @@ jobs:
         working-directory: backend
       - run: pytest tests/ -v
         working-directory: backend
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          ENVIRONMENT: development
 
   test-frontend:
     runs-on: ubuntu-latest
