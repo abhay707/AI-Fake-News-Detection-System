@@ -46,28 +46,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - name: Install dependencies
-        run: npm ci
-        working-directory: frontend
       - name: Install Vercel CLI
         run: npm install -g vercel
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: frontend
-        env:
-          VERCEL_ORG_ID: ${{ secrets.ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.PROJECT_ID }}
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: frontend
-        env:
-          VERCEL_ORG_ID: ${{ secrets.ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.PROJECT_ID }}
-          VITE_API_URL: https://fake-news-api-2826.onrender.com
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Vercel (Remote Build)
+        run: vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --build-env VITE_API_URL=https://fake-news-api-2826.onrender.com
         working-directory: frontend
         env:
           VERCEL_ORG_ID: ${{ secrets.ORG_ID }}
