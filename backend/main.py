@@ -5,9 +5,7 @@ from routes import predict, history
 app = FastAPI(title='Fake News Detector API', version='1.0.0')
 
 app.add_middleware(CORSMiddleware,
-    allow_origins=['http://localhost:5173',   # Vite dev server
-                   'https://ai-fake-news-detection-system-git-main-abhay707s-projects.vercel.app',
-                ],
+    allow_origins=['*'],
     allow_methods=['*'],
     allow_headers=['*'],
 )
