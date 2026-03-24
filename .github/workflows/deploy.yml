@@ -50,7 +50,6 @@ jobs:
         run: npm install -g vercel
       - name: Deploy to Vercel (Remote Build)
         run: vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --build-env VITE_API_URL=https://fake-news-api-2826.onrender.com
-        working-directory: frontend
         env:
           VERCEL_ORG_ID: ${{ secrets.ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.PROJECT_ID }}
