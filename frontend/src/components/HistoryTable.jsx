@@ -1,36 +1,10 @@
 // ── IMPORTS ────────────────────────────────────────────────
-import { useState } from "react";
+import { useState, useEffect } from 'react'
+import { getHistory } from '../api'
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, History, TrendingUp, Search, Trash2 } from "lucide-react";
-
-// ── MOCK DATA ──────────────────────────────────────────────
-const MOCK_HISTORY = [
-  { id: "a1", input_text: "NASA confirms discovery of a new habitable planet in the Alpha Centauri system.", prediction: "REAL", confidence: 0.94, model_used: "roberta-base", created_at: "2026-03-20T10:00:00Z" },
-  { id: "a2", input_text: "Shocking: Eating 5 pounds of raw garlic cures all known illnesses overnight!", prediction: "FAKE", confidence: 0.99, model_used: "bert-base", created_at: "2026-03-19T14:30:00Z" },
-  { id: "a3", input_text: "Global markets rally as tech stocks see unprecedented growth in Q1.", prediction: "REAL", confidence: 0.88, model_used: "distilbert-base", created_at: "2026-03-19T09:15:00Z" },
-  { id: "a4", input_text: "Local man builds working time machine out of microwave parts and a car battery.", prediction: "FAKE", confidence: 0.92, model_used: "roberta-base", created_at: "2026-03-18T16:45:00Z" },
-  { id: "a5", input_text: "New federal budget proposes significant increases to renewable energy initiatives.", prediction: "REAL", confidence: 0.81, model_used: "bert-base", created_at: "2026-03-18T11:20:00Z" },
-  { id: "a6", input_text: "Aliens have officially landed in Central Park and are requesting to speak with the manager.", prediction: "FAKE", confidence: 0.98, model_used: "distilbert-base", created_at: "2026-03-17T20:10:00Z" },
-  { id: "a7", input_text: "Study: Regular exercise linked to improved mental health and longevity.", prediction: "REAL", confidence: 0.96, model_used: "roberta-base", created_at: "2026-03-17T08:05:00Z" },
-  { id: "a8", input_text: "Breaking: The moon is actually made of cheese, government cover-up exposed.", prediction: "FAKE", confidence: 0.95, model_used: "bert-base", created_at: "2026-03-16T22:30:00Z" },
-  { id: "a9", input_text: "Major infrastructure bill passes Senate with bipartisan support.", prediction: "REAL", confidence: 0.89, model_used: "distilbert-base", created_at: "2026-03-16T15:40:00Z" },
-  { id: "a10", input_text: "Drinking bleach destroys the virus inside your body within seconds, claims expert.", prediction: "FAKE", confidence: 0.99, model_used: "roberta-base", created_at: "2026-03-15T18:25:00Z" },
-  { id: "a11", input_text: "Scientists develop new drought-resistant crop variety for arid regions.", prediction: "REAL", confidence: 0.85, model_used: "bert-base", created_at: "2026-03-15T09:50:00Z" },
-  { id: "a12", input_text: "Secret society of mole people living under New York City demands voting rights.", prediction: "FAKE", confidence: 0.91, model_used: "distilbert-base", created_at: "2026-03-14T21:15:00Z" },
-  { id: "a13", input_text: "Tech giant announces revolutionary new solid state battery technology for EVs.", prediction: "REAL", confidence: 0.93, model_used: "roberta-base", created_at: "2026-03-14T12:00:00Z" },
-  { id: "a14", input_text: "Celebrity found alive after being cloned at a secret island facility.", prediction: "FAKE", confidence: 0.87, model_used: "bert-base", created_at: "2026-03-13T19:40:00Z" },
-  { id: "a15", input_text: "National healthcare reform proposed to lower prescription drug costs.", prediction: "REAL", confidence: 0.84, model_used: "distilbert-base", created_at: "2026-03-13T10:30:00Z" },
-  { id: "a16", input_text: "Water turns into wine across several major cities a miracle occurs.", prediction: "FAKE", confidence: 0.96, model_used: "roberta-base", created_at: "2026-03-12T16:55:00Z" },
-  { id: "a17", input_text: "The Earth is definitively flat, high-altitude balloon footage confirms.", prediction: "FAKE", confidence: 0.99, model_used: "bert-base", created_at: "2026-03-12T11:20:00Z" },
-  { id: "a18", input_text: "Championship finals end in a stunning overtime victory for the underdogs.", prediction: "REAL", confidence: 0.97, model_used: "distilbert-base", created_at: "2026-03-11T23:10:00Z" },
-  { id: "a19", input_text: "Government releasing mind-control chemicals through airplane contrails.", prediction: "FAKE", confidence: 0.88, model_used: "roberta-base", created_at: "2026-03-11T14:45:00Z" },
-  { id: "a20", input_text: "Famous politician secretly replaced by reptilian shape-shifter years ago.", prediction: "FAKE", confidence: 0.94, model_used: "bert-base", created_at: "2026-03-10T17:30:00Z" },
-  { id: "a21", input_text: "Vaccine completely alters human DNA causing physical mutations, report says.", prediction: "FAKE", confidence: 0.99, model_used: "distilbert-base", created_at: "2026-03-10T09:15:00Z" },
-  { id: "a22", input_text: "Birds are not real; they are government surveillance drones meant to spy on us.", prediction: "FAKE", confidence: 0.92, model_used: "roberta-base", created_at: "2026-03-09T20:50:00Z" },
-  { id: "a23", input_text: "Millions of bees found dead due to new 5G towers being activated.", prediction: "FAKE", confidence: 0.89, model_used: "bert-base", created_at: "2026-03-09T13:40:00Z" }
-];
 
 // ── COMPONENT ──────────────────────────────────────────────
 const HistoryTable = () => {
@@ -38,10 +12,20 @@ const HistoryTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterVerdict, setFilterVerdict] = useState("ALL");
+  const [rows, setRows] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState(null);
   const ROWS_PER_PAGE = 8;
 
+  useEffect(() => {
+    getHistory()
+      .then(data => setRows(data))
+      .catch(() => setHistoryError('Could not load history'))
+      .finally(() => setHistoryLoading(false))
+  }, [])
+
   // ── DERIVED DATA ───────────────────────────────────────────
-  const filtered = MOCK_HISTORY.filter(
+  const filtered = rows.filter(
     (row) =>
       (filterVerdict === "ALL" || row.prediction === filterVerdict) &&
       row.input_text.toLowerCase().includes(searchQuery.toLowerCase())
@@ -106,6 +90,16 @@ const HistoryTable = () => {
         </div>
 
         {/* SECTION 3 — TABLE */}
+        {historyLoading && (
+          <p className="text-sm text-muted-foreground py-4 text-center">
+            Loading history...
+          </p>
+        )}
+        {historyError && (
+          <p className="text-sm text-destructive py-4 text-center">
+            {historyError}
+          </p>
+        )}
         <div className="w-full overflow-x-auto rounded-xl border">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 border-b">

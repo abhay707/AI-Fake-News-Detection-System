@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Shield, RotateCcw, Loader2, AlertCircle } from "lucide-react";
-import { mockPredict } from "../mocks/api";
+import { predict } from '../api'
 
 // ── COMPONENT ──────────────────────────────────────────────
 const NewsInputForm = ({ selectedModel }) => {
@@ -32,7 +32,7 @@ const NewsInputForm = ({ selectedModel }) => {
 
     setIsLoading(true);
     try {
-      const data = await mockPredict(inputText, selectedModel);
+      const data = await predict(inputText, selectedModel);
       setResult(data);
     } catch (err) {
       setError("__API_ERROR__");
@@ -72,9 +72,8 @@ const NewsInputForm = ({ selectedModel }) => {
             maxLength={5000}
             rows={8}
             placeholder="Paste a news article or headline here..."
-            className={`w-full resize-y rounded-lg border p-3 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-              hasValidationError ? "border-red-500 ring-1 ring-red-500" : "border-input"
-            }`}
+            className={`w-full resize-y rounded-lg border p-3 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${hasValidationError ? "border-red-500 ring-1 ring-red-500" : "border-input"
+              }`}
           />
           <div className="flex justify-between items-center mt-1">
             <span className="text-xs text-red-500">
@@ -118,11 +117,10 @@ const NewsInputForm = ({ selectedModel }) => {
           <div className="transition-all duration-500 ease-out">
             <hr className="border-border my-5" />
             <div
-              className={`rounded-xl border p-5 space-y-4 ${
-                result.prediction === "FAKE"
+              className={`rounded-xl border p-5 space-y-4 ${result.prediction === "FAKE"
                   ? "bg-red-50 border-red-200"
                   : "bg-green-50 border-green-200"
-              }`}
+                }`}
             >
               {/* ROW 1 */}
               <div className="flex items-center justify-between">
@@ -142,9 +140,8 @@ const NewsInputForm = ({ selectedModel }) => {
                 </div>
                 <div className="text-right">
                   <div
-                    className={`text-4xl font-bold ${
-                      result.prediction === "FAKE" ? "text-red-600" : "text-green-600"
-                    }`}
+                    className={`text-4xl font-bold ${result.prediction === "FAKE" ? "text-red-600" : "text-green-600"
+                      }`}
                   >
                     {Math.round(result.confidence * 100)}%
                   </div>
@@ -162,9 +159,8 @@ const NewsInputForm = ({ selectedModel }) => {
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2.5">
                   <div
-                    className={`h-2.5 rounded-full transition-all duration-700 ${
-                      result.prediction === "FAKE" ? "bg-red-500" : "bg-green-500"
-                    }`}
+                    className={`h-2.5 rounded-full transition-all duration-700 ${result.prediction === "FAKE" ? "bg-red-500" : "bg-green-500"
+                      }`}
                     style={{ width: `${result.confidence * 100}%` }}
                   />
                 </div>
