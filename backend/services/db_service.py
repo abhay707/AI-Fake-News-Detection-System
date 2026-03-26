@@ -1,5 +1,8 @@
 from supabase import create_client
 from config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 _client = None
 
@@ -18,13 +21,13 @@ def get_client():
 def save_prediction(text: str, result: dict) -> None:
     try:
         get_client().table('predictions').insert({
-            'input_text':  text,
-            'prediction':  result['prediction'],
-            'confidence':  result['confidence'],
-            'model_used':  result['model_used'],
+            'input_text': text,
+            'prediction': result['prediction'],
+            'confidence': result['confidence'],
+            'model_used': result['model_used'],
         }).execute()
     except Exception as e:
-        print(f"Warning: Failed to save prediction to DB: {e}")
+        logger.error(f"Failed to save prediction: {e}")
 
 def get_history(limit: int = 50) -> list:
     try:
@@ -35,5 +38,5 @@ def get_history(limit: int = 50) -> list:
                 .execute())
         return res.data
     except Exception as e:
-        print(f"Warning: Failed to fetch history from DB: {e}")
+        logger.error(f"Failed to get history: {e}")
         return []
