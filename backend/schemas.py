@@ -7,9 +7,9 @@ class PredictionRequest(BaseModel):
     model: str = Field(default='roberta-base', pattern='^(roberta-base)$')
 
 class PredictionResponse(BaseModel):
-    prediction: str
-    confidence: float
-    model_used: str
+    prediction:  str
+    confidence:  float
+    model_used:  str
     analysed_at: datetime
 
 class HistoryItem(BaseModel):

@@ -2,11 +2,17 @@ import { useState } from "react";
 import { Search, RotateCcw, Loader2, AlertCircle, Fingerprint, Brain, BarChart, AlertTriangle } from "lucide-react";
 import { predict } from '../api';
 
+<<<<<<< HEAD
 import VerityChip from "./ui/VerityChip";
 
 // NewsInputForm handles the input of news text and performs inference.
 // It is now locked to 'roberta-base' for all requests.
 const NewsInputForm = () => {
+=======
+// ── COMPONENT ──────────────────────────────────────────────
+const NewsInputForm = ({ selectedModel, onResult }) => {
+  // ── STATE ──────────────────────────────────────────────────
+>>>>>>> origin/main
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -31,6 +37,7 @@ const NewsInputForm = () => {
       // API call is now hardcoded to always use 'roberta-base'
       const data = await predict(inputText, 'roberta-base');
       setResult(data);
+      onResult?.(data, inputText);
     } catch (err) {
       setError("__API_ERROR__");
     } finally {
@@ -42,6 +49,7 @@ const NewsInputForm = () => {
     setInputText("");
     setResult(null);
     setError(null);
+    onResult?.(null, "");
   };
 
   const hasValidationError = error !== null && error !== "__API_ERROR__";
