@@ -1,124 +1,95 @@
-// ── IMPORTS ────────────────────────────────────────────────
-import { Badge } from "@/components/ui/badge";
-import { Zap, Brain, Gauge, CheckCircle2, Cpu } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
-// ── MODEL CONFIG ───────────────────────────────────────────
-const MODELS = [
-  {
-    id:          "roberta-base",
-    name:        "RoBERTa",
-    fullName:    "roberta-base",
-    description: "Best accuracy. Optimised pre-training with dynamic masking and larger batch sizes.",
-    accuracy:    98,
-    speed:       "Slow",
-    params:      "125M",
-    recommended: true,
-    icon:        Brain,
-    speedColor:  "text-amber-600",
-  },
-  {
-    id:          "bert-base",
-    name:        "BERT",
-    fullName:    "bert-base-uncased",
-    description: "Strong baseline transformer with bidirectional context understanding.",
-    accuracy:    97,
-    speed:       "Medium",
-    params:      "110M",
-    recommended: false,
-    icon:        Cpu,
-    speedColor:  "text-blue-600",
-  },
-  {
-    id:          "distilbert-base",
-    name:        "DistilBERT",
-    fullName:    "distilbert-base-uncased",
-    description: "Lightweight and fast. 40% smaller than BERT with 97% of its performance.",
-    accuracy:    96,
-    speed:       "Fast",
-    params:      "66M",
-    recommended: false,
-    icon:        Zap,
-    speedColor:  "text-green-600",
-  },
-];
+// ModelSelector renders the selectable models as stat cards
+// RoBERTa is active, other models are visually disabled with "Coming Soon" status.
+const ModelSelector = ({ selectedModel = 'roberta-base', onModelChange }) => {
+  const models = [
+    {
+      id: "roberta-base",
+      name: "RoBERTa-base",
+      badge: "Active",
+      accuracy: "97.2%",
+      speed: "Fast",
+      parameters: "125M",
+      description: "Robustly optimized BERT approach, best overall accuracy",
+      disabled: false,
+    },
+    {
+      id: "bert-base",
+      name: "BERT-base",
+      badge: "Coming Soon",
+      accuracy: "96.1%",
+      speed: "Medium",
+      parameters: "110M",
+      description: "Bidirectional encoder, strong general-purpose baseline",
+      disabled: true,
+    },
+    {
+      id: "distilbert-base",
+      name: "DistilBERT",
+      badge: "Coming Soon",
+      accuracy: "94.5%",
+      speed: "Fast",
+      parameters: "66M",
+      description: "Lighter, faster, distilled version of BERT",
+      disabled: true,
+    },
+  ];
 
-// ── COMPONENT ──────────────────────────────────────────────
-const ModelSelector = ({ selectedModel, onModelChange }) => {
-  const activeModel = MODELS.find(m => m.id === selectedModel);
-
-// ── RENDER ─────────────────────────────────────────────────
   return (
-    <div>
-      <p className="text-sm font-medium mb-3">Select Model</p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {MODELS.map((model) => {
-          const isSelected = selectedModel === model.id;
-          const Icon = model.icon;
-
-          return (
-            <div
-              key={model.id}
-              onClick={() => onModelChange(model.id)}
-              className={`cursor-pointer rounded-xl border-2 p-4 space-y-3 transition-all duration-200 ${
-                isSelected
-                  ? "border-blue-500 bg-blue-50 shadow-sm"
-                  : "border-border bg-background hover:border-blue-300 hover:bg-muted/30"
-              }`}
-            >
-              <div className="flex items-start justify-between">
-                <Icon
-                  size={22}
-                  className={isSelected ? "text-blue-600" : "text-muted-foreground"}
-                />
-                <div className="flex flex-col items-end gap-1">
-                  {model.recommended && (
-                    <Badge className="bg-blue-600 hover:bg-blue-700 text-white text-xs">
-                      Recommended
-                    </Badge>
-                  )}
-                  {isSelected && <CheckCircle2 size={18} className="text-blue-600" />}
-                </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {models.map((model) => {
+        const isSelected = model.id === 'roberta-base';
+        const isDisabled = model.disabled;
+        
+        return (
+          <div
+            key={model.id}
+            onClick={() => !isDisabled && onModelChange(model.id)}
+            className={`relative p-4 rounded-xl border-2 transition-all bg-surface-container ${
+              isDisabled 
+                ? "opacity-40 cursor-not-allowed border-transparent" 
+                : isSelected 
+                  ? "border-blue-500 bg-blue-500/10 shadow-md cursor-pointer" 
+                  : "border-transparent border-surface-variant/30 hover:border-surface-variant hover:bg-surface-container-high cursor-pointer"
+            }`}
+          >
+            {isSelected && (
+              <CheckCircle2 className="absolute top-4 right-4 text-blue-500" size={20} />
+            )}
+            
+            <div className="flex items-center gap-2 mb-2 pr-6">
+              <h3 className="font-bold text-on-surface">{model.name}</h3>
+              {model.badge && (
+                <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider ${
+                  model.badge === 'Active' ? 'bg-green-500/20 text-green-500' : 'bg-surface-variant text-on-surface-variant'
+                }`}>
+                  {model.badge}
+                </span>
+              )}
+            </div>
+            
+            <p className="text-xs text-on-surface-variant mb-4 h-8">
+              {model.description}
+            </p>
+            
+            <div className="grid grid-cols-3 gap-2 text-xs border-t border-surface-variant/50 pt-3">
+              <div className="flex flex-col">
+                <span className="text-on-surface-variant/70 mb-1">Accuracy</span>
+                <span className="font-mono font-medium text-on-surface">{model.accuracy}</span>
               </div>
-
-              <div>
-                <p className="font-semibold text-sm">{model.name}</p>
-                <p className="font-mono text-xs text-muted-foreground">
-                  {model.fullName}
-                </p>
+              <div className="flex flex-col border-l border-surface-variant/50 pl-2">
+                <span className="text-on-surface-variant/70 mb-1">Speed</span>
+                <span className="font-medium text-on-surface">{model.speed}</span>
               </div>
-
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {model.description}
-              </p>
-
-              <div className="grid grid-cols-3 gap-1 text-xs">
-                <div>
-                  <p className="text-muted-foreground">Accuracy</p>
-                  <p className="font-semibold">{model.accuracy}%</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Speed</p>
-                  <p className={`font-semibold ${model.speedColor}`}>
-                    {model.speed}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Params</p>
-                  <p className="font-semibold">{model.params}</p>
-                </div>
+              <div className="flex flex-col border-l border-surface-variant/50 pl-2">
+                <span className="text-on-surface-variant/70 mb-1">Params</span>
+                <span className="font-mono font-medium text-on-surface">{model.parameters}</span>
               </div>
             </div>
-          );
-        })}
-      </div>
-
-      <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
-        <Gauge size={14} />
-        <span>
-          Using <span className="font-mono font-medium text-foreground">{activeModel.fullName}</span> — {activeModel.accuracy}% accuracy on ISOT test set
-        </span>
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

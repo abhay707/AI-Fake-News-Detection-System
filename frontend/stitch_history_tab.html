@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Analysis History | The Verity</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-background": "#e7e4ec",
+              "inverse-primary": "#005bc4",
+              "on-secondary-fixed": "#3e3f45",
+              "on-primary-fixed": "#003c86",
+              "surface-container-lowest": "#000000",
+              "primary": "#adc6ff",
+              "surface-container-highest": "#25252b",
+              "surface-tint": "#adc6ff",
+              "tertiary": "#e1dcfd",
+              "on-secondary-fixed-variant": "#5a5b61",
+              "on-tertiary-fixed-variant": "#504e69",
+              "outline": "#75757c",
+              "error-dim": "#bb5551",
+              "surface-bright": "#2b2c32",
+              "on-primary-fixed-variant": "#0057bd",
+              "tertiary-fixed-dim": "#c5c0e0",
+              "inverse-on-surface": "#565457",
+              "secondary-fixed": "#e2e2e9",
+              "secondary-fixed-dim": "#d4d4db",
+              "on-surface-variant": "#acaab1",
+              "background": "#0e0e10",
+              "surface-variant": "#25252b",
+              "surface-container-low": "#131316",
+              "on-primary": "#003d88",
+              "secondary-container": "#3a3b41",
+              "on-surface": "#e7e4ec",
+              "primary-fixed": "#d8e2ff",
+              "on-tertiary-container": "#47445f",
+              "tertiary-container": "#d3ceef",
+              "surface": "#0e0e10",
+              "surface-container": "#19191d",
+              "on-tertiary-fixed": "#34314b",
+              "on-primary-container": "#bdd0ff",
+              "secondary": "#9d9da4",
+              "inverse-surface": "#fcf8fb",
+              "primary-dim": "#98b8ff",
+              "on-secondary-container": "#bebfc5",
+              "primary-container": "#004395",
+              "on-tertiary": "#504d68",
+              "surface-dim": "#0e0e10",
+              "on-error": "#490106",
+              "error-container": "#7f2927",
+              "error": "#ee7d77",
+              "tertiary-dim": "#c5c0e0",
+              "tertiary-fixed": "#d3ceef",
+              "on-secondary": "#1e2025",
+              "surface-container-high": "#1f1f24",
+              "outline-variant": "#47474e",
+              "secondary-dim": "#9d9da4",
+              "on-error-container": "#ff9993",
+              "primary-fixed-dim": "#c3d4ff"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full flex items-center justify-between px-6 py-4 bg-[#131316]/90 backdrop-blur-xl z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-blue-400 dark:text-[#adc6ff]" style="font-variation-settings: 'FILL' 0;">policy</span>
+<span class="text-lg font-black tracking-tighter text-[#e7e4ec]">The Verity</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest text-[#acaab1] hover:text-[#e7e4ec] transition-colors duration-300" href="#">Analyse</a>
+<a class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest text-[#adc6ff] transition-colors duration-300" href="#">History</a>
+<a class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest text-[#acaab1] hover:text-[#e7e4ec] transition-colors duration-300" href="#">Stats</a>
+<a class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest text-[#acaab1] hover:text-[#e7e4ec] transition-colors duration-300" href="#">Compare</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="close-up portrait of a professional investigator in a dark office setting with soft blue cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmTJCEax8rBFrwKtcxQsTZV9Onre2c9Yu_C1G8bt4AKQoYUXhhqLJuEaz5letTsrdhmrUSkWfN7vZxYEjilIfQjTXhwhG3YhT9jYkoN4KMHjn_SHIvDJojZUd5znwhbZYJXRFzJLbg4-2AdYx1jshcAfQ-lj9D3Co2RvoQ2ehEiICzTDhYVRlOZEaDS7zhq5bhshp6boU2otk58GpTmpjTEMZ2ORkS7p-q7t87UU7oXaCJmUHrDr8LcH9qVIbl9h-BeYl_FUWosWc"/>
+</div>
+</div>
+</header>
+<main class="min-h-screen flex flex-col md:flex-row">
+<!-- Sidebar: Advanced Filters -->
+<aside class="w-full md:w-80 bg-surface-container-low p-8 space-y-8 overflow-y-auto border-r border-outline-variant/10">
+<div>
+<h2 class="text-on-surface font-bold text-sm uppercase tracking-widest mb-6">Advanced Filters</h2>
+<!-- Date Range -->
+<div class="space-y-4 mb-8">
+<label class="text-on-surface-variant text-xs font-semibold block uppercase tracking-wider">Date Period</label>
+<div class="space-y-2">
+<div class="bg-surface-container p-3 rounded-xl flex items-center justify-between group hover:bg-surface-container-highest transition-colors cursor-pointer">
+<span class="text-sm">Last 24 Hours</span>
+<span class="material-symbols-outlined text-sm text-outline">calendar_today</span>
+</div>
+<div class="bg-surface-container p-3 rounded-xl flex items-center justify-between group hover:bg-surface-container-highest transition-colors cursor-pointer border border-primary/20">
+<span class="text-sm text-primary">Custom Range</span>
+<span class="material-symbols-outlined text-sm text-primary">date_range</span>
+</div>
+</div>
+</div>
+<!-- Model Type -->
+<div class="space-y-4 mb-8">
+<label class="text-on-surface-variant text-xs font-semibold block uppercase tracking-wider">Analysis Model</label>
+<div class="space-y-2">
+<label class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-highest cursor-pointer">
+<input checked="" class="rounded border-outline-variant bg-background text-primary focus:ring-primary/20" type="checkbox"/>
+<span class="text-sm">Neural-Static v4</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container transition-colors cursor-pointer">
+<input class="rounded border-outline-variant bg-background text-primary focus:ring-primary/20" type="checkbox"/>
+<span class="text-sm">GPT-Forensic</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container transition-colors cursor-pointer">
+<input class="rounded border-outline-variant bg-background text-primary focus:ring-primary/20" type="checkbox"/>
+<span class="text-sm">Optical-Audit</span>
+</label>
+</div>
+</div>
+<!-- Veracity Status -->
+<div class="space-y-4">
+<label class="text-on-surface-variant text-xs font-semibold block uppercase tracking-wider">Veracity Status</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold transition-all hover:scale-95 active:scale-90">REAL</button>
+<button class="px-4 py-2 rounded-full bg-error-container text-on-error-container text-xs font-bold transition-all hover:scale-95 active:scale-90">FAKE</button>
+<button class="px-4 py-2 rounded-full bg-tertiary-container text-on-tertiary-container text-xs font-bold transition-all hover:scale-95 active:scale-90">UNCERTAIN</button>
+</div>
+</div>
+</div>
+<!-- Quick Export Card -->
+<div class="bg-primary-container p-6 rounded-3xl relative overflow-hidden group cursor-pointer transition-transform duration-300 hover:scale-[0.98]">
+<div class="relative z-10">
+<h4 class="text-on-primary-container font-bold text-lg leading-tight mb-2">Export Forensic Protocol</h4>
+<p class="text-on-primary-container/70 text-xs mb-4">Generate signed PDF for current filtered results.</p>
+<div class="flex items-center gap-2 text-on-primary-container font-bold text-xs uppercase tracking-widest">
+<span>Download</span>
+<span class="material-symbols-outlined text-sm">download</span>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10 transform rotate-12 group-hover:rotate-0 transition-transform duration-500">
+<span class="material-symbols-outlined text-8xl" style="font-variation-settings: 'FILL' 1;">description</span>
+</div>
+</div>
+</aside>
+<!-- Main Content: Data Table -->
+<section class="flex-1 bg-surface flex flex-col min-w-0">
+<!-- Search & Actions Bar -->
+<div class="px-10 py-6 bg-surface flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-outline-variant/5">
+<div class="relative flex-1 max-w-2xl">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-2xl py-4 pl-12 pr-6 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Search investigation ID, source URL, or metadata..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-6 py-4 bg-surface-container-highest rounded-2xl text-on-surface text-sm font-bold hover:bg-[#2b2c32] transition-colors">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+<span>Sort: Newest</span>
+</button>
+<button class="flex items-center gap-2 px-6 py-4 bg-primary text-on-primary rounded-2xl text-sm font-bold hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>New Analysis</span>
+</button>
+</div>
+</div>
+<!-- The Forensic Table -->
+<div class="flex-1 overflow-x-auto px-10 py-4">
+<table class="w-full border-separate border-spacing-y-3">
+<thead>
+<tr class="text-left text-on-surface-variant text-[11px] uppercase tracking-[0.2em] font-bold">
+<th class="px-6 pb-2">Investigative Source</th>
+<th class="px-6 pb-2">Analysis Model</th>
+<th class="px-6 pb-2">Timestamp</th>
+<th class="px-6 pb-2">Outcome</th>
+<th class="px-6 pb-2 text-right">Actions</th>
+</tr>
+</thead>
+<tbody>
+<!-- Row 1 -->
+<tr class="group bg-surface-container hover:bg-surface-container-high transition-colors">
+<td class="px-6 py-5 rounded-l-2xl">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 rounded-xl bg-surface-container-highest flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-blue-400">link</span>
+</div>
+<div class="min-w-0">
+<div class="font-bold text-sm truncate max-w-[240px]">Deepfake Audio Clip - Political Rally</div>
+<div class="text-xs text-on-surface-variant truncate max-w-[240px]">media-cloud.com/assets/aud_9021...</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-mono bg-surface-container-highest px-3 py-1 rounded-md text-on-surface-variant">NEURAL-STATIC v4.2</span>
+</td>
+<td class="px-6 py-5 text-sm text-on-surface-variant font-light">
+                                Oct 24, 2024 · 14:22
+                            </td>
+<td class="px-6 py-5">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-error-container text-on-error-container text-[10px] font-black uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                    Synthetic
+                                </div>
+</td>
+<td class="px-6 py-5 rounded-r-2xl text-right">
+<button class="p-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">open_in_new</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="group bg-surface-container hover:bg-surface-container-high transition-colors">
+<td class="px-6 py-5 rounded-l-2xl">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 rounded-xl bg-surface-container-highest flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-blue-400">image</span>
+</div>
+<div class="min-w-0">
+<div class="font-bold text-sm truncate max-w-[240px]">Satellite Capture: Arctic Region</div>
+<div class="text-xs text-on-surface-variant truncate max-w-[240px]">sentinel-hub.org/layer_9983</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-mono bg-surface-container-highest px-3 py-1 rounded-md text-on-surface-variant">OPTICAL-AUDIT</span>
+</td>
+<td class="px-6 py-5 text-sm text-on-surface-variant font-light">
+                                Oct 24, 2024 · 11:05
+                            </td>
+<td class="px-6 py-5">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-black uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+                                    Authentic
+                                </div>
+</td>
+<td class="px-6 py-5 rounded-r-2xl text-right">
+<button class="p-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">open_in_new</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="group bg-surface-container hover:bg-surface-container-high transition-colors">
+<td class="px-6 py-5 rounded-l-2xl">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 rounded-xl bg-surface-container-highest flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-blue-400">article</span>
+</div>
+<div class="min-w-0">
+<div class="font-bold text-sm truncate max-w-[240px]">Transcript Analysis: Q3 Earnings</div>
+<div class="text-xs text-on-surface-variant truncate max-w-[240px]">sec-archive.gov/filing_0012</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-mono bg-surface-container-highest px-3 py-1 rounded-md text-on-surface-variant">GPT-FORENSIC</span>
+</td>
+<td class="px-6 py-5 text-sm text-on-surface-variant font-light">
+                                Oct 23, 2024 · 18:45
+                            </td>
+<td class="px-6 py-5">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tertiary-container text-on-tertiary-container text-[10px] font-black uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                    Anomalous
+                                </div>
+</td>
+<td class="px-6 py-5 rounded-r-2xl text-right">
+<button class="p-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">open_in_new</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="group bg-surface-container hover:bg-surface-container-high transition-colors">
+<td class="px-6 py-5 rounded-l-2xl">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 rounded-xl bg-surface-container-highest flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-blue-400">videocam</span>
+</div>
+<div class="min-w-0">
+<div class="font-bold text-sm truncate max-w-[240px]">CCTV Footage: District 4 Leak</div>
+<div class="text-xs text-on-surface-variant truncate max-w-[240px]">local-intranet.secure/feed/01</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs font-mono bg-surface-container-highest px-3 py-1 rounded-md text-on-surface-variant">NEURAL-STATIC v4.2</span>
+</td>
+<td class="px-6 py-5 text-sm text-on-surface-variant font-light">
+                                Oct 23, 2024 · 09:12
+                            </td>
+<td class="px-6 py-5">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-error-container text-on-error-container text-[10px] font-black uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                    Synthetic
+                                </div>
+</td>
+<td class="px-6 py-5 rounded-r-2xl text-right">
+<button class="p-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">open_in_new</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Bar -->
+<footer class="px-10 py-8 border-t border-outline-variant/10 flex items-center justify-between">
+<div class="text-xs text-on-surface-variant font-medium">
+                    Showing <span class="text-on-surface">1 - 4</span> of 128 investigations
+                </div>
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface-variant opacity-40 cursor-not-allowed">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-on-primary font-bold text-sm">1</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface hover:bg-[#2b2c32] font-bold text-sm transition-colors">2</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface hover:bg-[#2b2c32] font-bold text-sm transition-colors">3</button>
+<div class="px-2 text-on-surface-variant">...</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface hover:bg-[#2b2c32] font-bold text-sm transition-colors">32</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface hover:bg-[#2b2c32] transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</footer>
+</section>
+</main>
+<!-- Global Footer -->
+<footer class="w-full flex flex-col md:flex-row items-center justify-between gap-6 px-10 p-12 bg-[#0e0e10] border-t border-[#25252b]/30">
+<div class="flex flex-col gap-2">
+<span class="font-bold text-[#e7e4ec]">Forensic Lens</span>
+<p class="font-['Inter'] text-xs font-light text-[#acaab1]">© 2024 Forensic Lens. Technical Authority in Information.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-['Inter'] text-xs font-light text-[#acaab1] hover:text-[#e7e4ec] transition-colors duration-300" href="#">Privacy Protocol</a>
+<a class="font-['Inter'] text-xs font-light text-[#acaab1] hover:text-[#e7e4ec] transition-colors duration-300" href="#">Source Integrity</a>
+<a class="font-['Inter'] text-xs font-light text-[#acaab1] hover:text-[#e7e4ec] transition-colors duration-300" href="#">API</a>
+</div>
+</footer>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center px-4 py-3 pb-6 bg-[#0e0e10]/95 backdrop-blur-2xl">
+<div class="flex flex-col items-center justify-center text-[#acaab1] opacity-60 hover:opacity-100 transition-opacity active:scale-90 transition-transform">
+<span class="material-symbols-outlined">search_insights</span>
+<span class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest mt-1">Analyse</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#25252b] text-[#adc6ff] rounded-xl px-3 py-1.5 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">history</span>
+<span class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest mt-1">History</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#acaab1] opacity-60 hover:opacity-100 transition-opacity active:scale-90 transition-transform">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest mt-1">Stats</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#acaab1] opacity-60 hover:opacity-100 transition-opacity active:scale-90 transition-transform">
+<span class="material-symbols-outlined">compare_arrows</span>
+<span class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest mt-1">Compare</span>
+</div>
+</nav>
+</body></html>

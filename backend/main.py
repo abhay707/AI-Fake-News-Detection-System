@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import predict, history
+from routes import predict, history, auth
 
 app = FastAPI(title='Fake News Detector API', version='1.0.0')
 
@@ -12,6 +12,7 @@ app.add_middleware(CORSMiddleware,
 
 app.include_router(predict.router)
 app.include_router(history.router)
+app.include_router(auth.router)
 
 @app.get('/')
 async def root():

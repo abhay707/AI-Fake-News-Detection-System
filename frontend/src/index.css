@@ -1,3 +1,24 @@
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface text-on-surface font-inter antialiased;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-surface-variant/80 backdrop-blur-xl border-none shadow-2xl shadow-surface-lowest;
+  }
+  .ghost-border {
+    @apply ring-1 ring-inset ring-outline-variant/15;
+  }
+}
+

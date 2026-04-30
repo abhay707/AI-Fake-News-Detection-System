@@ -39,6 +39,9 @@ const PredictionResult = ({ result }) => {
             <p className={`text-3xl font-bold ${colorClass}`}>
               {result.prediction} NEWS
             </p>
+            <div className="mt-1 inline-flex w-fit items-center rounded-md bg-muted px-2 py-1 text-xs font-mono text-muted-foreground">
+              Model: {result.model_used || result.model || 'bert-base'}
+            </div>
           </div>
         </div>
         <div className="relative w-[100px] h-[100px]">
