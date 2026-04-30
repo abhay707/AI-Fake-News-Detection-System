@@ -9,13 +9,13 @@ def test_health():
     r = client.get('/health')
     assert r.status_code == 200
 
-# Test 2 — bert-base returns correct shape
-def test_predict_bert_returns_correct_shape():
+# Test 2 — roberta-base returns correct shape
+def test_predict_roberta_returns_correct_shape():
     r = client.post('/api/predict',
-        json={'text': 'A' * 25, 'model': 'bert-base'})
+        json={'text': 'A' * 25, 'model': 'roberta-base'})
     assert r.status_code == 200
     body = r.json()
-    assert body['model_used'] == 'bert-base'
+    assert body['model_used'].startswith('roberta-base')
     assert body['prediction'] in ['REAL', 'FAKE']
     assert 0.0 <= body['confidence'] <= 1.0
     assert 'analysed_at' in body
@@ -32,8 +32,8 @@ def test_predict_rejects_invalid_model():
         json={'text': 'A' * 25, 'model': 'gpt-4'})
     assert r.status_code == 422
 
-# Test 5 — roberta-base rejected at schema level now that it is locked out
-def test_predict_rejects_roberta_model():
+# Test 5 — bert-base rejected at schema level now that it is locked out
+def test_predict_rejects_bert_model():
     r = client.post('/api/predict',
-        json={'text': 'A' * 25, 'model': 'roberta-base'})
+        json={'text': 'A' * 25, 'model': 'bert-base'})
     assert r.status_code == 422
