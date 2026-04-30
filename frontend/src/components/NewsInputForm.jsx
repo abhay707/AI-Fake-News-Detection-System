@@ -7,7 +7,7 @@ import { Search, Shield, RotateCcw, Loader2, AlertCircle } from "lucide-react";
 import { predict } from '../api'
 
 // ── COMPONENT ──────────────────────────────────────────────
-const NewsInputForm = ({ selectedModel }) => {
+const NewsInputForm = ({ selectedModel, onResult }) => {
   // ── STATE ──────────────────────────────────────────────────
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +34,7 @@ const NewsInputForm = ({ selectedModel }) => {
     try {
       const data = await predict(inputText, selectedModel);
       setResult(data);
+      onResult?.(data, inputText);
     } catch (err) {
       setError("__API_ERROR__");
     } finally {
@@ -45,6 +46,7 @@ const NewsInputForm = ({ selectedModel }) => {
     setInputText("");
     setResult(null);
     setError(null);
+    onResult?.(null, "");
   };
 
   // ── RENDER ─────────────────────────────────────────────────
