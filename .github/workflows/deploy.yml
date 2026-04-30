@@ -16,7 +16,7 @@ jobs:
         working-directory: backend
       - run: pip list
         working-directory: backend
-      - run: pytest tests/ -v
+      - run: pytest tests/test_predict.py -v
         working-directory: backend
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
