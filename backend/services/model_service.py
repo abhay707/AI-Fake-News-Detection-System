@@ -1,7 +1,5 @@
 import os
 import time
-import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from datetime import datetime, timezone
 import logging
 from config import settings
@@ -19,6 +17,10 @@ MODEL_MAP = {
 
 # Loads the requested model and tokenizer into memory if not already cached.
 def _load(model_id: str):
+    # Lazy import — torch/transformers only needed in production inference
+    import torch  # noqa: F401  (used in predict())
+    from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
     if model_id not in _models:
         folder_name = MODEL_MAP[model_id]
         model_path = os.path.join(settings.model_path, folder_name)
@@ -84,12 +86,13 @@ def predict(text: str, model_id: str = 'roberta-base') -> dict:
     )
     
     # Run inference
+    import torch
     with torch.no_grad():
         outputs = model(**inputs)
         logits = outputs.logits
         
     # Calculate probabilities
-    probs = torch.softmax(logits, dim=1)
+    probs = torch.softmax(logits, dim=1)  # torch already imported above
     confidence = torch.max(probs).item()
     predicted_idx = torch.argmax(probs).item()
     
