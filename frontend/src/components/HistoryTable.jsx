@@ -21,18 +21,28 @@ const HistoryTable = ({ onNewAnalysis }) => {
   const [rows, setRows] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [historyError, setHistoryError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
   const ROWS_PER_PAGE = 8;
 
   useEffect(() => {
+    setHistoryLoading(true);
+    setHistoryError(null);
     getHistory()
       .then(data => {
         // Sort newest first
         const sorted = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         setRows(sorted);
       })
-      .catch(() => setHistoryError('Could not load history'))
+      .catch((err) => {
+        const isNetworkError = !err.response;
+        setHistoryError(
+          isNetworkError
+            ? 'Backend offline — start the server on port 8002'
+            : `Server error ${err.response?.status}: could not load history`
+        );
+      })
       .finally(() => setHistoryLoading(false));
-  }, []);
+  }, [retryCount]);
 
   const filtered = rows.filter(
     (row) =>
@@ -180,8 +190,14 @@ const HistoryTable = ({ onNewAnalysis }) => {
                 </tr>
               ) : historyError ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-10 text-error bg-error-container/20 rounded-2xl">
-                    {historyError}
+                  <td colSpan="5" className="text-center py-10 bg-error-container/20 rounded-2xl">
+                    <p className="text-error font-semibold text-sm mb-3">{historyError}</p>
+                    <button
+                      onClick={() => setRetryCount(c => c + 1)}
+                      className="px-4 py-2 bg-surface-container text-on-surface text-xs font-bold rounded-xl hover:bg-surface-container-high transition-colors"
+                    >
+                      Retry
+                    </button>
                   </td>
                 </tr>
               ) : paginated.length === 0 ? (
