@@ -223,7 +223,7 @@ const HistoryTable = ({ onNewAnalysis }) => {
                               {row.input_text.slice(0, 40) || "Unknown string element"}{row.input_text.length > 40 && '...'}
                             </div>
                             <div className="text-xs text-on-surface-variant truncate max-w-[240px]">
-                              id: {row.id.split('-')[0]}... ({Math.round(row.confidence * 100)}% conf)
+                              id: {String(row.id).split('-')[0]}... ({Math.round(row.confidence * 100)}% conf)
                             </div>
                           </div>
                         </div>
