@@ -11,7 +11,7 @@ MODEL_MAP = {
 }
 
 # HuggingFace Inference API endpoint
-HF_MODEL_ID = "mrm8488/bert-tiny-finetuned-fake-news-detection"
+HF_MODEL_ID = "jy46604790/Fake-News-Bert-Detect"
 HF_API_URL = f"https://router.huggingface.co/hf-inference/models/{HF_MODEL_ID}"
 
 
