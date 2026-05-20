@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     supabase_key: str
     model_path:   str = './models/roberta-fake-news'
     environment:  str = 'development'
+    hf_api_token: str = ''
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
