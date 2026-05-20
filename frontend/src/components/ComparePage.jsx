@@ -31,9 +31,9 @@ const MODELS = [
     accentTo: "#004395",
   },
   {
-    id: "roberta-base",
-    name: "RoBERTa",
-    subtitle: "Robustly Optimized",
+    id: "bert-base",
+    name: "BERT-base",
+    subtitle: "Bidirectional Encoder",
     icon: Brain,
     accentFrom: "#e1dcfd",
     accentTo: "#504d68",
@@ -55,7 +55,7 @@ function getAnalysisText(modelId, prediction, confidence) {
       FAKE: "Detected high frequency of sensationalist linguistic patterns and lack of verifiable named entities in the primary claim.",
       REAL: "Linguistic pattern analysis confirms structured, informative writing with consistent source attribution and factual references.",
     },
-    "roberta-base": {
+    "bert-base": {
       FAKE: "Insufficient cross-referencing markers. Contextual framing appears neutral but lacks primary evidence indicators.",
       REAL: "Strong cross-referencing detected. Contextual framing is consistent with verified journalistic standards.",
     },

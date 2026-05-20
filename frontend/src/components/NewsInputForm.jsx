@@ -6,7 +6,7 @@ import VerityChip from "./ui/VerityChip";
 
 // NewsInputForm handles the input of news text and performs inference.
 // It is now locked to 'roberta-base' for all requests.
-const NewsInputForm = () => {
+const NewsInputForm = ({ selectedModel = 'roberta-base', onPredictionComplete }) => {
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -29,8 +29,9 @@ const NewsInputForm = () => {
     setIsLoading(true);
     try {
       // API call is now hardcoded to always use 'roberta-base'
-      const data = await predict(inputText, 'roberta-base');
+      const data = await predict(inputText, selectedModel);
       setResult(data);
+      onPredictionComplete?.(data);
       onResult?.(data, inputText);
     } catch (err) {
       setError("__API_ERROR__");
@@ -130,7 +131,7 @@ const NewsInputForm = () => {
           )}
         </button>
         <p className="text-xs font-mono text-on-surface-variant mt-2">
-          🟢 Using RoBERTa-base  •  BERT & DistilBERT coming soon
+          🟢 3 models active: RoBERTa-base, BERT-base, DistilBERT
         </p>
       </div>
 

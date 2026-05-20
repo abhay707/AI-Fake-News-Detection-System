@@ -17,29 +17,29 @@ const ModelSelector = ({ selectedModel = 'roberta-base', onModelChange }) => {
     {
       id: "bert-base",
       name: "BERT-base",
-      badge: "Coming Soon",
+      badge: "Active",
       accuracy: "96.1%",
       speed: "Medium",
       parameters: "110M",
       description: "Bidirectional encoder, strong general-purpose baseline",
-      disabled: true,
+      disabled: false,
     },
     {
       id: "distilbert-base",
       name: "DistilBERT",
-      badge: "Coming Soon",
+      badge: "Active",
       accuracy: "94.5%",
       speed: "Fast",
       parameters: "66M",
       description: "Lighter, faster, distilled version of BERT",
-      disabled: true,
+      disabled: false,
     },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       {models.map((model) => {
-        const isSelected = model.id === 'roberta-base';
+        const isSelected = model.id === selectedModel;
         const isDisabled = model.disabled;
         
         return (

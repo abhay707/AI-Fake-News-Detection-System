@@ -9,14 +9,22 @@ logger = logging.getLogger(__name__)
 _models = {}
 _tokenizers = {}
 
-MODEL_MAP = {
-    'roberta-base': 'roberta-base-fake-news',
+# Map frontend model_id → HuggingFace repo name
+MODEL_REPO = {
+    'roberta-base':    'Pulk17/Fake-News-Detection',
+    'bert-base':       'jy46604790/Fake-News-Bert-Detect',
+    'distilbert-base': 'mrm8488/bert-tiny-finetuned-fake-news-detection',
 }
 
-# HuggingFace model loaded locally via transformers.
-# Pulk17/Fake-News-Detection is a DistilBERT fine-tuned on the WELFake dataset.
-# LABEL_0 = FAKE, LABEL_1 = REAL.
-HF_FALLBACK_REPO = "Pulk17/Fake-News-Detection"
+# Map frontend model_id → label inversion flag.
+# False = LABEL_0 is FAKE, LABEL_1 is REAL (the natural mapping)
+# True  = LABEL_0 is REAL, LABEL_1 is FAKE (flipped)
+# Set empirically after testing. Start with False, flip if predictions are inverted.
+LABEL_FLIPPED = {
+    'roberta-base':    False,  # Verified working tonight
+    'bert-base':       False,  # To verify
+    'distilbert-base': True,  # To verify
+}
 
 
 def _load(model_id: str):
@@ -25,22 +33,13 @@ def _load(model_id: str):
     if model_id in _models:
         return
 
-    folder_name = MODEL_MAP[model_id]
-    model_path = os.path.join(settings.model_path, folder_name)
-    has_local_weights = (
-        os.path.exists(os.path.join(model_path, 'model.safetensors'))
-        or os.path.exists(os.path.join(model_path, 'pytorch_model.bin'))
-    )
+    if model_id not in MODEL_REPO:
+        raise ValueError(f"Unknown model_id: {model_id}")
 
-    if has_local_weights:
-        logger.info(f"Loading local weights for {model_id} from {model_path}")
-        _tokenizers[model_id] = AutoTokenizer.from_pretrained(model_path)
-        _models[model_id] = AutoModelForSequenceClassification.from_pretrained(model_path)
-    else:
-        logger.info(f"Loading {HF_FALLBACK_REPO} from HuggingFace Hub.")
-        _tokenizers[model_id] = AutoTokenizer.from_pretrained(HF_FALLBACK_REPO)
-        _models[model_id] = AutoModelForSequenceClassification.from_pretrained(HF_FALLBACK_REPO)
-
+    hf_repo = MODEL_REPO[model_id]
+    logger.info(f"Loading {hf_repo} for {model_id} from HuggingFace Hub.")
+    _tokenizers[model_id] = AutoTokenizer.from_pretrained(hf_repo)
+    _models[model_id] = AutoModelForSequenceClassification.from_pretrained(hf_repo)
     _models[model_id].eval()
 
 
@@ -52,9 +51,10 @@ def _approx_token_count(text: str) -> int:
 def predict(text: str, model_id: str = 'roberta-base') -> dict:
     t_start = time.perf_counter()
 
-    if model_id not in MODEL_MAP:
+    if model_id not in MODEL_REPO:
         raise ValueError(
-            f"Model '{model_id}' is not available. Only 'roberta-base' is currently active."
+            f"Model '{model_id}' is not available. "
+            f"Choose from: {list(MODEL_REPO.keys())}"
         )
 
     _load(model_id)
@@ -78,17 +78,14 @@ def predict(text: str, model_id: str = 'roberta-base') -> dict:
     confidence = torch.max(probs).item()
     predicted_idx = torch.argmax(probs).item()
 
-    id2label = model.config.id2label
-    raw_label = id2label[predicted_idx]
-
-    label_upper = raw_label.upper()
-    if label_upper in ("LABEL_0", "FAKE", "0"):
-        prediction = "FAKE"
-    elif label_upper in ("LABEL_1", "REAL", "TRUE", "1"):
-        prediction = "REAL"
-    else:
-        logger.warning(f"Unexpected label '{raw_label}' from model.")
+    # Apply per-model label direction
+    flipped = LABEL_FLIPPED[model_id]
+    if not flipped:
+        # LABEL_0 = FAKE, LABEL_1 = REAL
         prediction = "FAKE" if predicted_idx == 0 else "REAL"
+    else:
+        # Inverted
+        prediction = "REAL" if predicted_idx == 0 else "FAKE"
 
     tokens = int(inputs['input_ids'].shape[1])
     elapsed = (time.perf_counter() - t_start) * 1000

@@ -4,8 +4,7 @@ from typing import Optional
 
 class PredictionRequest(BaseModel):
     text: str = Field(..., min_length=20, max_length=5000)
-    model: str = Field(default='roberta-base', pattern='^(roberta-base)$')
-
+    model: str = Field(default='roberta-base', pattern='^(roberta-base|bert-base|distilbert-base)$')
 class PredictionResponse(BaseModel):
     prediction:  str
     confidence:  float

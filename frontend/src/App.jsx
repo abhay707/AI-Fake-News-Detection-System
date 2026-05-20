@@ -4,8 +4,7 @@ import NewsInputForm from './components/NewsInputForm';
 import ModelSelector from './components/ModelSelector';
 import HistoryTable from './components/HistoryTable';
 import StatsPage from './components/StatsPage';
-// ComparePage hidden until RoBERTa + DistilBERT are retrained
-// import ComparePage from './components/ComparePage';
+import ComparePage from './components/ComparePage';
 import SettingsPage from './components/SettingsPage';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
@@ -14,6 +13,7 @@ import './App.css';
 
 export default function App() {
   const [selectedModel, setSelectedModel] = useState('roberta-base');
+  const [latestResult, setLatestResult] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [appView, setAppView] = useState('landing');
   const [userData, setUserData] = useState(() => {
@@ -65,77 +65,131 @@ export default function App() {
                   onModelChange={setSelectedModel} 
                 />
               </div>
-              <NewsInputForm />
+              <NewsInputForm selectedModel={selectedModel} onPredictionComplete={setLatestResult} />
             </div>
             
-            {/* System Parameters & Nodes Sidebar */}
+            {/* Live Telemetry Sidebar */}
             <div className="xl:col-span-1 flex flex-col gap-6 h-full">
-              {/* Parameters */}
+
+              {/* Section 1 — Analysis Telemetry */}
               <div className="bg-surface-container-low rounded-3xl p-6 flex flex-col gap-6 shadow-xl shadow-surface-lowest/40">
-                <h3 className="font-bold text-xs uppercase tracking-widest text-on-surface-variant">System Parameters</h3>
+                <h3 className="font-bold text-xs uppercase tracking-widest text-on-surface-variant">Analysis Telemetry</h3>
                 <div className="space-y-5">
+                  {/* Confidence */}
                   <div className="space-y-2">
                     <div className="flex justify-between text-[10px] font-bold text-on-surface-variant">
-                      <span>Sensitivity</span>
-                      <span>0.85</span>
+                      <span>Confidence</span>
+                      <span className="font-mono text-on-surface">
+                        {latestResult ? `${Math.round(latestResult.confidence * 100)}%` : '—'}
+                      </span>
                     </div>
                     <div className="h-1 w-full bg-surface-container rounded-full overflow-hidden">
-                      <div className="h-full w-[85%] bg-primary"></div>
+                      <div
+                        className="h-full bg-primary transition-all duration-700 ease-out"
+                        style={{ width: latestResult ? `${Math.round(latestResult.confidence * 100)}%` : '0%' }}
+                      />
                     </div>
                   </div>
+                  {/* Processing Time */}
                   <div className="space-y-2">
                     <div className="flex justify-between text-[10px] font-bold text-on-surface-variant">
-                      <span>Depth Alpha</span>
-                      <span>0.42</span>
+                      <span>Processing Time</span>
+                      <span className="font-mono text-on-surface">
+                        {latestResult ? `${Math.round(latestResult.processing_time_ms)}ms` : '—'}
+                      </span>
                     </div>
                     <div className="h-1 w-full bg-surface-container rounded-full overflow-hidden">
-                      <div className="h-full w-[42%] bg-primary"></div>
+                      {/* cap bar at 2000ms max for display */}
+                      <div
+                        className="h-full bg-tertiary transition-all duration-700 ease-out"
+                        style={{ width: latestResult ? `${Math.min(100, (latestResult.processing_time_ms / 2000) * 100)}%` : '0%' }}
+                      />
+                    </div>
+                  </div>
+                  {/* Token Usage */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-[10px] font-bold text-on-surface-variant">
+                      <span>Token Usage</span>
+                      <span className="font-mono text-on-surface">
+                        {latestResult ? `${latestResult.token_count} / 512` : '—'}
+                      </span>
+                    </div>
+                    <div className="h-1 w-full bg-surface-container rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-secondary transition-all duration-700 ease-out"
+                        style={{ width: latestResult ? `${Math.round((latestResult.token_count / 512) * 100)}%` : '0%' }}
+                      />
                     </div>
                   </div>
                 </div>
-                
+
+                {/* Section 2 — Last Verdict */}
                 <div className="pt-2">
-                  <div className="w-full h-24 bg-surface-container rounded-2xl relative overflow-hidden flex items-center justify-center border-2 border-dashed border-outline-variant/20 group">
-                     <div className="w-full h-full opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')] absolute inset-0"></div>
-                     <div className="relative text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 group-hover:text-primary transition-colors">
-                       Awaiting Target
-                     </div>
-                  </div>
+                  {latestResult ? (
+                    <div className={`w-full rounded-2xl p-4 flex flex-col gap-2 border ${
+                      latestResult.prediction === 'FAKE'
+                        ? 'bg-error-container/20 border-error/20'
+                        : 'bg-emerald-500/10 border-emerald-500/20'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-xs font-black uppercase tracking-widest ${
+                          latestResult.prediction === 'FAKE' ? 'text-error' : 'text-emerald-400'
+                        }`}>
+                          {latestResult.prediction === 'FAKE' ? '⬤ Synthetic' : '⬤ Authentic'}
+                        </span>
+                        <span className="text-[10px] font-mono text-on-surface-variant">
+                          {latestResult.analysed_at
+                            ? new Date(latestResult.analysed_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                            : 'Just now'}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">
+                        {latestResult.model_used}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="w-full h-20 bg-surface-container rounded-2xl flex items-center justify-center border-2 border-dashed border-outline-variant/20">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50">
+                        Awaiting Target
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
-              
-              {/* Semantic Nodes */}
+
+              {/* Section 3 — Diagnostic Modules */}
               <div className="bg-surface-container-low p-6 rounded-3xl flex-grow shadow-xl shadow-surface-lowest/40">
-                <h3 className="font-bold text-xs uppercase tracking-widest text-on-surface-variant mb-6">Semantic Nodes</h3>
+                <h3 className="font-bold text-xs uppercase tracking-widest text-on-surface-variant mb-6">Diagnostic Modules</h3>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-container border border-surface-container-high">
-                    <div className="flex items-center gap-3">
-                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(173,198,255,0.6)]"></span>
-                      <span className="text-xs font-medium text-on-surface">Entity Extraction</span>
+                  {[
+                    { label: 'Model Inference',  active: !!latestResult },
+                    { label: 'Database Logging', active: !!latestResult },
+                    { label: 'Tokenizer',        active: !!(latestResult?.token_count > 0) },
+                    { label: 'History Sync',     active: true },
+                  ].map(({ label, active }) => (
+                    <div
+                      key={label}
+                      className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all duration-500 ${
+                        active
+                          ? 'bg-surface-container border-surface-container-high'
+                          : 'bg-surface-container opacity-50 border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`w-2 h-2 rounded-full ${
+                          active
+                            ? 'bg-primary animate-pulse shadow-[0_0_8px_rgba(173,198,255,0.6)]'
+                            : 'bg-outline-variant'
+                        }`} />
+                        <span className="text-xs font-medium text-on-surface">{label}</span>
+                      </div>
+                      <span className={`text-[10px] font-bold uppercase ${
+                        active ? 'text-on-surface-variant' : 'text-outline-variant'
+                      }`}>
+                        {active ? 'Active' : 'Standby'}
+                      </span>
                     </div>
-                    <span className="text-[10px] font-bold text-on-surface-variant uppercase">Active</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-container border border-surface-container-high">
-                    <div className="flex items-center gap-3">
-                      <span className="w-2 h-2 rounded-full bg-tertiary animate-[pulse_2s_ease-in-out_infinite_0.5s] shadow-[0_0_8px_rgba(225,220,253,0.4)]"></span>
-                      <span className="text-xs font-medium text-on-surface">Coreference Mesh</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-on-surface-variant uppercase">Active</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-container opacity-50 border border-transparent">
-                    <div className="flex items-center gap-3">
-                      <span className="w-2 h-2 rounded-full bg-outline-variant"></span>
-                      <span className="text-xs font-medium text-on-surface">Cross-Source Map</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-outline-variant uppercase">Standby</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-surface-container opacity-50 border border-transparent">
-                    <div className="flex items-center gap-3">
-                      <span className="w-2 h-2 rounded-full bg-outline-variant"></span>
-                      <span className="text-xs font-medium text-on-surface">Temporal Logic</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-outline-variant uppercase">Standby</span>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -151,12 +205,9 @@ export default function App() {
         <StatsPage />
       )}
 
-      {/* TODO Week 5 — re-enable when Member 1 delivers retrained checkpoints */}
-      {/* Compare tab hidden until RoBERTa + DistilBERT are retrained
       {activeTab === 'compare' && (
         <ComparePage />
       )}
-      */}
 
       {activeTab === 'settings' && (
         <SettingsPage userData={userData} authToken={authToken} setUserData={setUserData} onLogout={handleLogout} />

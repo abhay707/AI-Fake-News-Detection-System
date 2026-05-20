@@ -31,14 +31,12 @@ export default function DashboardLayout({ children, activeTab = 'dashboard', onT
           >
             Stats
           </button>
-          {/* Compare tab hidden until RoBERTa + DistilBERT are retrained
-          <button 
+          <button
             onClick={() => onTabChange && onTabChange('compare')}
             className={`font-inter text-[11px] font-semibold uppercase tracking-widest transition-colors duration-300 ${activeTab === 'compare' ? 'text-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
           >
             Compare
           </button>
-          */}
         </nav>
         <div className="flex items-center gap-4">
           <button 
@@ -93,15 +91,13 @@ export default function DashboardLayout({ children, activeTab = 'dashboard', onT
           <BarChart2 className="w-5 h-5" />
           <span className="font-inter text-[11px] font-semibold uppercase tracking-widest mt-1">Stats</span>
         </button>
-        {/* Compare tab hidden until RoBERTa + DistilBERT are retrained
-        <button 
+        <button
           onClick={() => onTabChange && onTabChange('compare')}
           className={`flex flex-col items-center justify-center transition-all ${activeTab === 'compare' ? 'bg-surface-container text-primary rounded-xl px-3 py-1.5' : 'text-on-surface-variant opacity-60 hover:opacity-100'}`}
         >
           <ArrowRightLeft className="w-5 h-5" />
           <span className="font-inter text-[11px] font-semibold uppercase tracking-widest mt-1">Compare</span>
         </button>
-        */}
       </nav>
     </div>
   );

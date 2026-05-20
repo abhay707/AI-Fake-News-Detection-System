@@ -26,6 +26,17 @@ const HistoryTable = ({ onNewAnalysis }) => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // Model filter state — all 3 checked by default
+  const MODELS = [
+    { id: "roberta-base", label: "roberta-base-fake-news" },
+    { id: "bert-base",    label: "bert-base-fake-news" },
+    { id: "distilbert-base", label: "distilbert-fast" },
+  ];
+  const [filterModels, setFilterModels] = useState(new Set(MODELS.map(m => m.id)));
+
+  // Sort order state
+  const [sortOrder, setSortOrder] = useState("newest");
+
   const ROWS_PER_PAGE = 8;
 
   useEffect(() => {
@@ -47,26 +58,33 @@ const HistoryTable = ({ onNewAnalysis }) => {
       .finally(() => setHistoryLoading(false));
   }, [retryCount]);
 
-  const filtered = rows.filter((row) => {
-    if (filterVerdict !== "ALL" && row.prediction !== filterVerdict) return false;
-    if (!row.input_text.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+  const filtered = rows
+    .filter((row) => {
+      if (filterVerdict !== "ALL" && row.prediction !== filterVerdict) return false;
+      if (!row.input_text.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (filterModels.size > 0 && !filterModels.has(row.model_used)) return false;
 
-    if (datePeriod === "custom") {
-      const rowDate = new Date(row.created_at);
-      if (startDate) {
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        if (rowDate < start) return false;
+      if (datePeriod === "custom") {
+        const rowDate = new Date(row.created_at);
+        if (startDate) {
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0);
+          if (rowDate < start) return false;
+        }
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          if (rowDate > end) return false;
+        }
       }
-      if (endDate) {
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        if (rowDate > end) return false;
-      }
-    }
 
-    return true;
-  });
+      return true;
+    })
+    .sort((a, b) =>
+      sortOrder === "newest"
+        ? new Date(b.created_at) - new Date(a.created_at)
+        : new Date(a.created_at) - new Date(b.created_at)
+    );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
   const paginated = filtered.slice(
@@ -146,28 +164,36 @@ const HistoryTable = ({ onNewAnalysis }) => {
           <div className="space-y-4 mb-8">
             <label className="text-on-surface-variant text-xs font-semibold block uppercase tracking-wider">Analysis Model</label>
             <div className="space-y-2">
-              {/* Active model */}
-              <label className="flex items-center gap-3 p-3 rounded-xl bg-surface-container-highest cursor-default">
-                <input
-                  type="checkbox"
-                  checked
-                  readOnly
-                  className="rounded border-outline-variant bg-background text-primary focus:ring-primary/20"
-                />
-                <span className="text-sm">roberta-base-fake-news</span>
-              </label>
-              {/* Coming soon models */}
-              {["bert-base-fake-news", "distilbert-fast"].map((name) => (
-                <div key={name} className="flex items-center gap-3 p-3 rounded-xl opacity-50 cursor-not-allowed">
-                  <input
-                    type="checkbox"
-                    disabled
-                    className="rounded border-outline-variant bg-background text-primary"
-                  />
-                  <span className="text-sm flex-1">{name}</span>
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-outline border border-outline/30 rounded px-1.5 py-0.5">Soon</span>
-                </div>
-              ))}
+              {MODELS.map((model) => {
+                const checked = filterModels.has(model.id);
+                return (
+                  <label
+                    key={model.id}
+                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors ${
+                      checked ? "bg-surface-container-highest" : "hover:bg-surface-container"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => {
+                        setFilterModels(prev => {
+                          const next = new Set(prev);
+                          if (next.has(model.id)) {
+                            if (next.size > 1) next.delete(model.id);
+                          } else {
+                            next.add(model.id);
+                          }
+                          return next;
+                        });
+                        setCurrentPage(1);
+                      }}
+                      className="rounded border-outline-variant bg-background text-primary focus:ring-primary/20"
+                    />
+                    <span className="text-sm">{model.label}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
@@ -214,9 +240,12 @@ const HistoryTable = ({ onNewAnalysis }) => {
             />
           </div>
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-6 py-4 bg-surface-container-highest rounded-2xl text-on-surface text-sm font-bold hover:bg-[#2b2c32] transition-colors">
+            <button
+              onClick={() => { setSortOrder(o => o === "newest" ? "oldest" : "newest"); setCurrentPage(1); }}
+              className="flex items-center gap-2 px-6 py-4 bg-surface-container-highest rounded-2xl text-on-surface text-sm font-bold hover:bg-[#2b2c32] transition-colors"
+            >
               <Filter className="w-4 h-4" />
-              <span>Sort: Newest</span>
+              <span>Sort: {sortOrder === "newest" ? "Newest" : "Oldest"}</span>
             </button>
             <button
               onClick={onNewAnalysis}
