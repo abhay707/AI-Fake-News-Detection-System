@@ -6,120 +6,93 @@ from config import settings
 
 logger = logging.getLogger(__name__)
 
-# Cache for loaded models and tokenizers
 _models = {}
 _tokenizers = {}
 
-# Active models mapping
 MODEL_MAP = {
     'roberta-base': 'roberta-base-fake-news',
 }
 
-# Loads the requested model and tokenizer into memory if not already cached.
+# HuggingFace model used when local weights aren't available.
+# DistilBERT fine-tuned on fake news detection: LABEL_0=FAKE, LABEL_1=REAL.
+HF_FALLBACK_REPO = "Pulk17/Fake-News-Detection"
+
+
 def _load(model_id: str):
-    # Lazy import — torch/transformers only needed in production inference
-    import torch  # noqa: F401  (used in predict())
     from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-    if model_id not in _models:
-        folder_name = MODEL_MAP[model_id]
-        model_path = os.path.join(settings.model_path, folder_name)
-        if not os.path.exists(os.path.join(model_path, 'model.safetensors')) and not os.path.exists(os.path.join(model_path, 'pytorch_model.bin')):
-            logger.warning(f"Local weights not found for {model_id} in {model_path}. Falling back to HF Hub tiny model.")
-            hf_repo = "mrm8488/bert-tiny-finetuned-fake-news-detection"
-            _tokenizers[model_id] = AutoTokenizer.from_pretrained(hf_repo)
-            _models[model_id] = AutoModelForSequenceClassification.from_pretrained(hf_repo)
-        else:
-            _tokenizers[model_id] = AutoTokenizer.from_pretrained(model_path)
-            _models[model_id] = AutoModelForSequenceClassification.from_pretrained(model_path)
-        
-        _models[model_id].eval()
+    if model_id in _models:
+        return
+
+    folder_name = MODEL_MAP[model_id]
+    model_path = os.path.join(settings.model_path, folder_name)
+    has_local_weights = (
+        os.path.exists(os.path.join(model_path, 'model.safetensors'))
+        or os.path.exists(os.path.join(model_path, 'pytorch_model.bin'))
+    )
+
+    if has_local_weights:
+        logger.info(f"Loading local weights for {model_id} from {model_path}")
+        _tokenizers[model_id] = AutoTokenizer.from_pretrained(model_path)
+        _models[model_id] = AutoModelForSequenceClassification.from_pretrained(model_path)
+    else:
+        logger.info(f"Local weights not found. Loading {HF_FALLBACK_REPO} from HuggingFace Hub.")
+        _tokenizers[model_id] = AutoTokenizer.from_pretrained(HF_FALLBACK_REPO)
+        _models[model_id] = AutoModelForSequenceClassification.from_pretrained(HF_FALLBACK_REPO)
+
+    _models[model_id].eval()
+
 
 def _approx_token_count(text: str) -> int:
-    """Approximate RoBERTa token count: ~1.3 tokens per word, capped at 512."""
     word_count = len(text.split())
     return min(512, round(word_count * 1.3))
+
 
 def predict(text: str, model_id: str = 'roberta-base') -> dict:
     t_start = time.perf_counter()
 
-    if settings.environment == 'development':
-        import random
-        elapsed = (time.perf_counter() - t_start) * 1000
-        return {
-            'prediction':        'FAKE' if random.random() > 0.5 else 'REAL',
-            'confidence':        round(random.uniform(0.7, 0.99), 4),
-            'model_used':        f'{model_id}-mock',
-            'analysed_at':       datetime.now(timezone.utc),
-            'token_count':       _approx_token_count(text),
-            'processing_time_ms': round(elapsed, 1),
-        }
-
     if model_id not in MODEL_MAP:
-        raise ValueError(f"Model '{model_id}' is not available. Only 'roberta-base' is currently active.")
+        raise ValueError(
+            f"Model '{model_id}' is not available. Only 'roberta-base' is currently active."
+        )
 
-    # Only reached in production with real models
-    try:
-        _load(model_id)
-        tokenizer = _tokenizers[model_id]
-        model = _models[model_id]
-    except (ImportError, OSError, Exception) as e:
-        logger.warning(f"ML models not ready or missing dependencies ({e}). Falling back to mock prediction.")
-        import random
-        elapsed = (time.perf_counter() - t_start) * 1000
-        return {
-            'prediction':        'FAKE' if random.random() > 0.5 else 'REAL',
-            'confidence':        round(random.uniform(0.7, 0.99), 4),
-            'model_used':        f'{model_id}-mock-fallback',
-            'analysed_at':       datetime.now(timezone.utc),
-            'token_count':       _approx_token_count(text),
-            'processing_time_ms': round(elapsed, 1),
-        }
+    _load(model_id)
+    tokenizer = _tokenizers[model_id]
+    model = _models[model_id]
 
-    # Tokenize input text
     inputs = tokenizer(
-        text, 
-        truncation=True, 
-        max_length=512, 
-        padding=True, 
-        return_tensors='pt'
+        text,
+        truncation=True,
+        max_length=512,
+        padding=True,
+        return_tensors='pt',
     )
-    
-    # Run inference
+
     import torch
     with torch.no_grad():
         outputs = model(**inputs)
         logits = outputs.logits
-        
-    # Calculate probabilities
-    probs = torch.softmax(logits, dim=1)  # torch already imported above
+
+    probs = torch.softmax(logits, dim=1)
     confidence = torch.max(probs).item()
     predicted_idx = torch.argmax(probs).item()
-    
-    # Read label from model configuration
-    id2label = model.config.id2label
-    prediction = id2label[predicted_idx]
-    
-    # Map LABEL_0 and LABEL_1 to FAKE and REAL if using HF fallback
-    if prediction == "LABEL_0":
-        prediction = "FAKE"
-    elif prediction == "LABEL_1":
-        prediction = "REAL"
 
-    # Temporary demo heuristic: the tiny fallback model often struggles with short 
-    # out-of-distribution text. If we are using the fallback, apply a keyword 
-    # override to ensure the demo snippets work exactly as expected.
-    if hasattr(model, 'name_or_path') and model.name_or_path == "mrm8488/bert-tiny-finetuned-fake-news-detection":
-        text_lower = text.lower()
-        if "alien" in text_lower or "secretly passes law" in text_lower or "confiscate" in text_lower:
-            prediction = "FAKE"
-            confidence = 0.9821
-        elif "federal reserve" in text_lower or "mit" in text_lower:
-            prediction = "REAL"
-            confidence = 0.9915
-        elif "uncertain" in text_lower or "ambiguous" in text_lower:
-            prediction = "FAKE"
-            confidence = 0.6432
+    # Label mapping for hamzab/roberta-fake-news-classification
+    # VERIFY THIS BEFORE TRUSTING: run the sanity check in the next step.
+    # The model's config.id2label is the source of truth.
+    id2label = model.config.id2label
+    raw_label = id2label[predicted_idx]
+
+    # Map common label formats to our standard FAKE/REAL output
+    label_upper = raw_label.upper()
+    if label_upper in ("LABEL_0", "FAKE", "0"):
+        prediction = "FAKE"
+    elif label_upper in ("LABEL_1", "REAL", "TRUE", "1"):
+        prediction = "REAL"
+    else:
+        # Unexpected label — log and default based on index
+        logger.warning(f"Unexpected label '{raw_label}' from model. Defaulting on index.")
+        prediction = "FAKE" if predicted_idx == 0 else "REAL"
 
     tokens = int(inputs['input_ids'].shape[1])
     elapsed = (time.perf_counter() - t_start) * 1000
@@ -130,5 +103,5 @@ def predict(text: str, model_id: str = 'roberta-base') -> dict:
         'model_used': model_id,
         'analysed_at': datetime.now(timezone.utc),
         'token_count': tokens,
-        'processing_time_ms': round(elapsed, 1)
+        'processing_time_ms': round(elapsed, 1),
     }
