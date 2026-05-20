@@ -49,10 +49,6 @@ export default function LandingPage({ onStart, onLoginClick, onSignupClick }) {
 
       {/* HERO */}
       <div className="hero" id="features">
-        <div className="hero-badge">
-          <span>Live Forensic Analysis Active</span>
-        </div>
-
         <h1 className="hero-title">
           Precision Truth in a<br />
           <span className="accent">Synthetic Era.</span>

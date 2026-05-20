@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { getHistory } from '../api';
-import { 
-  Calendar, 
-  CalendarRange, 
-  Search, 
-  Filter, 
-  Plus, 
-  Link as LinkIcon, 
+import {
+  Calendar,
+  CalendarRange,
+  Search,
+  Filter,
+  Plus,
+  Link as LinkIcon,
   ExternalLink,
   ChevronLeft,
   ChevronRight,
-  Download,
-  FileText
 } from "lucide-react";
 
 const HistoryTable = ({ onNewAnalysis }) => {
@@ -22,6 +20,12 @@ const HistoryTable = ({ onNewAnalysis }) => {
   const [historyLoading, setHistoryLoading] = useState(true);
   const [historyError, setHistoryError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+
+  // Date period state
+  const [datePeriod, setDatePeriod] = useState("all"); // "all" | "custom"
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
   const ROWS_PER_PAGE = 8;
 
   useEffect(() => {
@@ -29,7 +33,6 @@ const HistoryTable = ({ onNewAnalysis }) => {
     setHistoryError(null);
     getHistory()
       .then(data => {
-        // Sort newest first
         const sorted = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         setRows(sorted);
       })
@@ -44,11 +47,26 @@ const HistoryTable = ({ onNewAnalysis }) => {
       .finally(() => setHistoryLoading(false));
   }, [retryCount]);
 
-  const filtered = rows.filter(
-    (row) =>
-      (filterVerdict === "ALL" || row.prediction === filterVerdict) &&
-      row.input_text.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filtered = rows.filter((row) => {
+    if (filterVerdict !== "ALL" && row.prediction !== filterVerdict) return false;
+    if (!row.input_text.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+
+    if (datePeriod === "custom") {
+      const rowDate = new Date(row.created_at);
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        if (rowDate < start) return false;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        if (rowDate > end) return false;
+      }
+    }
+
+    return true;
+  });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
   const paginated = filtered.slice(
@@ -56,64 +74,120 @@ const HistoryTable = ({ onNewAnalysis }) => {
     currentPage * ROWS_PER_PAGE
   );
 
+  const handleDatePeriod = (period) => {
+    setDatePeriod(period);
+    if (period === "all") {
+      setStartDate("");
+      setEndDate("");
+    }
+    setCurrentPage(1);
+  };
+
   return (
     <div className="flex flex-col md:flex-row flex-1 overflow-hidden bg-surface pb-0 md:pb-0">
       {/* Sidebar: Advanced Filters */}
       <aside className="w-full md:w-80 bg-surface-container-low p-8 space-y-8 overflow-y-auto border-r border-outline-variant/10 shrink-0">
         <div>
           <h2 className="text-on-surface font-bold text-sm uppercase tracking-widest mb-6">Advanced Filters</h2>
-          
-          {/* Date Range */}
+
+          {/* Date Period */}
           <div className="space-y-4 mb-8">
             <label className="text-on-surface-variant text-xs font-semibold block uppercase tracking-wider">Date Period</label>
             <div className="space-y-2">
-              <div className="bg-surface-container p-3 rounded-xl flex items-center justify-between group hover:bg-surface-container-highest transition-colors cursor-pointer">
-                <span className="text-sm">All Time</span>
-                <Calendar className="w-4 h-4 text-outline" />
-              </div>
-              <div className="bg-surface-container p-3 rounded-xl flex items-center justify-between group hover:bg-surface-container-highest transition-colors cursor-pointer border border-primary/20">
-                <span className="text-sm text-primary">Custom Range</span>
-                <CalendarRange className="w-4 h-4 text-primary" />
-              </div>
+              <button
+                onClick={() => handleDatePeriod("all")}
+                className={`w-full bg-surface-container p-3 rounded-xl flex items-center justify-between transition-colors ${
+                  datePeriod === "all"
+                    ? "ring-2 ring-primary bg-surface-container-highest"
+                    : "hover:bg-surface-container-highest"
+                }`}
+              >
+                <span className={`text-sm ${datePeriod === "all" ? "text-primary font-semibold" : ""}`}>All Time</span>
+                <Calendar className={`w-4 h-4 ${datePeriod === "all" ? "text-primary" : "text-outline"}`} />
+              </button>
+              <button
+                onClick={() => handleDatePeriod("custom")}
+                className={`w-full bg-surface-container p-3 rounded-xl flex items-center justify-between transition-colors ${
+                  datePeriod === "custom"
+                    ? "ring-2 ring-primary bg-surface-container-highest"
+                    : "hover:bg-surface-container-highest"
+                }`}
+              >
+                <span className={`text-sm ${datePeriod === "custom" ? "text-primary font-semibold" : ""}`}>Custom Range</span>
+                <CalendarRange className={`w-4 h-4 ${datePeriod === "custom" ? "text-primary" : "text-outline"}`} />
+              </button>
             </div>
+
+            {datePeriod === "custom" && (
+              <div className="space-y-2 pt-1">
+                <div>
+                  <label className="text-on-surface-variant text-[10px] uppercase tracking-wider font-semibold mb-1 block">From</label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
+                    className="w-full bg-surface-container border border-outline-variant/20 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-on-surface-variant text-[10px] uppercase tracking-wider font-semibold mb-1 block">To</label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
+                    className="w-full bg-surface-container border border-outline-variant/20 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                  />
+                </div>
+              </div>
+            )}
           </div>
-          
-          {/* Model Type */}
+
+          {/* Analysis Model */}
           <div className="space-y-4 mb-8">
             <label className="text-on-surface-variant text-xs font-semibold block uppercase tracking-wider">Analysis Model</label>
             <div className="space-y-2">
-              <label className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container transition-colors cursor-pointer">
-                <input type="checkbox" className="rounded border-outline-variant bg-background text-primary focus:ring-primary/20" />
-                <span className="text-sm">bert-base-fake-news</span>
-              </label>
-              <label className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container transition-colors cursor-pointer">
-                <input type="checkbox" className="rounded border-outline-variant bg-background text-primary focus:ring-primary/20" />
-                <span className="text-sm">distilbert-fast</span>
-              </label>
-              <label className="flex items-center gap-3 p-3 rounded-xl bg-surface-container-highest cursor-pointer">
-                <input type="checkbox" checked className="rounded border-outline-variant bg-background text-primary focus:ring-primary/20" />
+              {/* Active model */}
+              <label className="flex items-center gap-3 p-3 rounded-xl bg-surface-container-highest cursor-default">
+                <input
+                  type="checkbox"
+                  checked
+                  readOnly
+                  className="rounded border-outline-variant bg-background text-primary focus:ring-primary/20"
+                />
                 <span className="text-sm">roberta-base-fake-news</span>
               </label>
+              {/* Coming soon models */}
+              {["bert-base-fake-news", "distilbert-fast"].map((name) => (
+                <div key={name} className="flex items-center gap-3 p-3 rounded-xl opacity-50 cursor-not-allowed">
+                  <input
+                    type="checkbox"
+                    disabled
+                    className="rounded border-outline-variant bg-background text-primary"
+                  />
+                  <span className="text-sm flex-1">{name}</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-outline border border-outline/30 rounded px-1.5 py-0.5">Soon</span>
+                </div>
+              ))}
             </div>
           </div>
-          
+
           {/* Veracity Status */}
           <div className="space-y-4">
             <label className="text-on-surface-variant text-xs font-semibold block uppercase tracking-wider">Veracity Status</label>
             <div className="flex flex-wrap gap-2">
-              <button 
+              <button
                 onClick={() => { setFilterVerdict("REAL"); setCurrentPage(1); }}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition-all hover:scale-95 active:scale-90 ${filterVerdict === 'REAL' ? 'bg-secondary-container text-on-secondary-container ring-2 ring-secondary-fixed' : 'bg-surface-container text-on-surface-variant'}`}
               >
                 REAL
               </button>
-              <button 
+              <button
                 onClick={() => { setFilterVerdict("FAKE"); setCurrentPage(1); }}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition-all hover:scale-95 active:scale-90 ${filterVerdict === 'FAKE' ? 'bg-error-container text-on-error-container ring-2 ring-error' : 'bg-surface-container text-on-surface-variant'}`}
               >
                 FAKE
               </button>
-              <button 
+              <button
                 onClick={() => { setFilterVerdict("ALL"); setCurrentPage(1); }}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition-all hover:scale-95 active:scale-90 ${filterVerdict === 'ALL' ? 'bg-tertiary-container text-on-tertiary-container ring-2 ring-tertiary' : 'bg-surface-container text-on-surface-variant'}`}
               >
@@ -122,36 +196,21 @@ const HistoryTable = ({ onNewAnalysis }) => {
             </div>
           </div>
         </div>
-        
-        {/* Quick Export Card */}
-        <div className="bg-primary-container p-6 rounded-3xl relative overflow-hidden group cursor-pointer transition-transform duration-300 hover:scale-[0.98] mt-auto">
-          <div className="relative z-10">
-            <h4 className="text-on-primary-container font-bold text-lg leading-tight mb-2">Export Forensic Protocol</h4>
-            <p className="text-on-primary-container/70 text-xs mb-4">Generate signed PDF for current filtered results.</p>
-            <div className="flex items-center gap-2 text-on-primary-container font-bold text-xs uppercase tracking-widest">
-              <span>Download</span>
-              <Download className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="absolute -right-4 -bottom-4 opacity-10 transform rotate-12 group-hover:rotate-0 transition-transform duration-500">
-            <FileText className="w-24 h-24" />
-          </div>
-        </div>
       </aside>
 
       {/* Main Content: Data Table */}
       <section className="flex-1 bg-surface flex flex-col min-w-0">
-        
+
         {/* Search & Actions Bar */}
         <div className="px-10 py-6 bg-surface flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-outline-variant/5">
           <div className="relative flex-1 max-w-2xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant w-5 h-5" />
-            <input 
-              type="text" 
-              placeholder="Search investigation ID, source URL, or metadata..." 
+            <input
+              type="text"
+              placeholder="Search investigation ID, source URL, or metadata..."
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-              className="w-full bg-surface-container-low border-none rounded-2xl py-4 pl-12 pr-6 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary/20 transition-all outline-none" 
+              className="w-full bg-surface-container-low border-none rounded-2xl py-4 pl-12 pr-6 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary/20 transition-all outline-none"
             />
           </div>
           <div className="flex items-center gap-3">
@@ -159,7 +218,7 @@ const HistoryTable = ({ onNewAnalysis }) => {
               <Filter className="w-4 h-4" />
               <span>Sort: Newest</span>
             </button>
-            <button 
+            <button
               onClick={onNewAnalysis}
               className="flex items-center gap-2 px-6 py-4 bg-primary text-on-primary rounded-2xl text-sm font-bold hover:opacity-90 transition-opacity"
             >
@@ -168,7 +227,7 @@ const HistoryTable = ({ onNewAnalysis }) => {
             </button>
           </div>
         </div>
-        
+
         {/* The Forensic Table */}
         <div className="flex-1 overflow-x-auto px-10 py-4">
           <table className="w-full border-separate border-spacing-y-3 min-w-[800px]">
@@ -210,7 +269,7 @@ const HistoryTable = ({ onNewAnalysis }) => {
               ) : (
                 paginated.map((row) => {
                   const isFake = row.prediction === 'FAKE';
-                  
+
                   return (
                     <tr key={row.id} className="group bg-surface-container hover:bg-surface-container-high transition-colors">
                       <td className="px-6 py-5 rounded-l-2xl">
@@ -235,7 +294,7 @@ const HistoryTable = ({ onNewAnalysis }) => {
                       </td>
                       <td className="px-6 py-5 text-sm text-on-surface-variant font-light whitespace-nowrap">
                         {new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        <span className="mx-1">·</span> 
+                        <span className="mx-1">·</span>
                         {new Date(row.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                       </td>
                       <td className="px-6 py-5">
@@ -263,7 +322,7 @@ const HistoryTable = ({ onNewAnalysis }) => {
             </tbody>
           </table>
         </div>
-        
+
         {/* Pagination Bar */}
         <footer className="px-10 py-6 border-t border-outline-variant/10 flex items-center justify-between">
           <div className="text-xs text-on-surface-variant font-medium">
@@ -272,14 +331,14 @@ const HistoryTable = ({ onNewAnalysis }) => {
             </span> of {filtered.length} investigations
           </div>
           <div className="flex items-center gap-2">
-            <button 
+            <button
               disabled={currentPage === 1 || filtered.length === 0}
               onClick={() => setCurrentPage(p => p - 1)}
               className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface-variant hover:text-on-surface disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            
+
             <div className="flex items-center gap-1">
                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
                  if (p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)) {
@@ -288,8 +347,8 @@ const HistoryTable = ({ onNewAnalysis }) => {
                        key={p}
                        onClick={() => setCurrentPage(p)}
                        className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold text-sm transition-colors ${
-                         currentPage === p 
-                           ? 'bg-primary text-on-primary' 
+                         currentPage === p
+                           ? 'bg-primary text-on-primary'
                            : 'bg-surface-container-highest text-on-surface hover:bg-[#2b2c32]'
                        }`}
                      >
@@ -302,8 +361,8 @@ const HistoryTable = ({ onNewAnalysis }) => {
                  return null;
                })}
             </div>
-            
-            <button 
+
+            <button
               disabled={currentPage === totalPages || filtered.length === 0}
               onClick={() => setCurrentPage(p => p + 1)}
               className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-highest text-on-surface hover:bg-[#2b2c32] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"

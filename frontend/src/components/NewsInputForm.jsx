@@ -47,7 +47,6 @@ const NewsInputForm = () => {
   };
 
   const hasValidationError = error !== null && error !== "__API_ERROR__";
-  const hasApiError = error === "__API_ERROR__";
 
   let sentiment = "Neutral";
   let complexity = "Narrative";
@@ -135,16 +134,9 @@ const NewsInputForm = () => {
         </p>
       </div>
 
-      {/* API Error Banner */}
-      {hasApiError && (
-        <div className="flex items-start gap-3 rounded-2xl bg-error-container p-4 text-sm text-on-error-container animate-fade-in ghost-border">
-          <AlertCircle size={18} className="mt-0.5 shrink-0" />
-          <span className="font-medium">System failure: Unable to establish handshake with the inference engine.</span>
-        </div>
-      )}
 
       {/* Result Empty State Placeholder */}
-      {result === null && !isLoading && !hasApiError && (
+      {result === null && !isLoading && (
         <div className="mt-4 rounded-[2.5rem] bg-surface-container-low/30 border-2 border-dashed border-outline-variant/20 p-12 flex flex-col items-center justify-center gap-4 text-on-surface-variant min-h-[300px]">
            <div className="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mb-2">
               <Fingerprint className="w-8 h-8 opacity-40 text-on-surface-variant" />
