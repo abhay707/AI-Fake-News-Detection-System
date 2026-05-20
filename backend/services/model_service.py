@@ -12,7 +12,7 @@ MODEL_MAP = {
 
 # HuggingFace Inference API endpoint
 HF_MODEL_ID = "Pulk17/Fake-News-Detection"
-HF_API_URL = f"https://api-inference.huggingface.co/models/{HF_MODEL_ID}"
+HF_API_URL = f"https://router.huggingface.co/hf-inference/models/{HF_MODEL_ID}"
 
 
 def _approx_token_count(text: str) -> int:
