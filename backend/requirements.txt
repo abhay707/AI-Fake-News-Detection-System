@@ -6,4 +6,5 @@ pydantic
 pydantic-settings
 pytest
 httpx
-requests
+torch
+transformers
