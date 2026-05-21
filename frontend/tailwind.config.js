@@ -7,7 +7,18 @@ export default {
       inter: ['Inter', 'sans-serif'],
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+      },
+      letterSpacing: {
+        tightest: '-0.045em',
+      },
       colors: {
+        ink: { 950: '#06060a', 900: '#0a0a0f', 850: '#0d0d14', 800: '#101019' },
+        accent: { DEFAULT: '#60a5fa', strong: '#3b82f6', deep: '#2563eb' },
+        violet: { glow: '#a78bfa' },
+        teal: { glow: '#5eead4' },
         surface: '#0e0e10',
         'surface-bright': '#2b2c32',
         'surface-container': '#19191d',
