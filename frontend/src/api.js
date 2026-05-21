@@ -18,3 +18,8 @@ export const getHistory = async () => {
   const { data } = await API.get('/api/history')
   return data
 }
+
+export const getStats = async () => {
+  const { data } = await API.get('/api/stats')
+  return data
+}
